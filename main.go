@@ -33,21 +33,6 @@ func (e Event) Validate() error {
 
 // Function that returns nothing
 func healthCheck(w http.ResponseWriter, r *http.Request) { // w is where the response is written, r the incoming request
-	//event := Event{Message: "Hello there", Number: 43} // creating a data structure
-
-	//err := w.Write([]byte(`{"status":"ok"}`)) // Write deals in bytes, string is converted to bytes here
-	//fmt.Println(event)
-	//if event.Message == "" {
-	//	http.Error(w, "message required", http.StatusBadRequest)
-	//	return
-	//}
-	//err := json.NewEncoder(w).Encode(event)
-	//if err != nil {
-	//	return
-	//}
-	//w.Header().Set("Content-Type", "application/json")
-	//w.WriteHeader(http.StatusOK)
-
 	w.Header().Set("Content-Type", "application/json")
 	// No WriteHeader: 200 is what we want, and the first write sends it.
 	if err := json.NewEncoder(w).Encode(map[string]string{"status": "ok"}); err != nil {
@@ -68,17 +53,6 @@ func createEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//if event.Message == "" { // handwritten field check, explicit validation
-	//	http.Error(w, "message is required", http.StatusBadRequest)
-	//	return
-	//}
-
-	//// declare and test in one line, err exists in the if only
-	//if err := json.NewDecoder(r.Body).Decode(&e); err != nil { // &e passes a copy of the event
-	//	http.Error(w, "invalid JSON", http.StatusBadRequest)
-	//	return
-	//}
-
 	fmt.Println(event)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -86,12 +60,6 @@ func createEvent(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(event); err != nil {
 		log.Printf("createEvent: encoding response: %v", err)
 	}
-
-	//// Start encoding, write the event into the response and implicitly write a 200 OK status
-	//if err := json.NewEncoder(w).Encode(event); err != nil {
-	//	http.Error(w, "Event creation failed", http.StatusInternalServerError)
-	//	log.Printf("encoding response: %v", err)
-	//}
 }
 
 // decodeJSON reads a single JSON object from the request body into dst,
