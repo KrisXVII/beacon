@@ -7,7 +7,13 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"reflect"
+	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
+
+var validate = newValidator()
 
 type Event struct {
 	Message string `json:"message" validate:"required"`
@@ -22,16 +28,38 @@ func (e Event) String() string {
 
 // Validate reports whether the event carries the fields Beacon requires.
 func (e Event) Validate() error {
-	if e.Message == "" {
-		return errors.New(`field "message" is required`)
+	err := validate.Struct(e)
+	if err == nil {
+		return nil
 	}
-	if e.Number < 0 {
-		return errors.New(`field "number" must be zero or greater`)
+	var verrs validator.ValidationErrors
+	if errors.As(err, &verrs) && len(verrs) > 0 {
+		f := verrs[0]
+		switch f.Tag() {
+		case "required":
+			return fmt.Errorf("field %q is required", f.Field())
+		case "gte":
+			return fmt.Errorf("field %q must be at least %s", f.Field(), f.Param())
+		default:
+			return fmt.Errorf("field %q is invalid", f.Field())
+		}
 	}
-	return nil
+	return errors.New("invalid payload")
 }
 
-// Function that returns nothing
+func newValidator() *validator.Validate {
+	v := validator.New()
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
+	return v
+}
+
+// healthCheck reports that the service is running.
 func healthCheck(w http.ResponseWriter, r *http.Request) { // w is where the response is written, r the incoming request
 	w.Header().Set("Content-Type", "application/json")
 	// No WriteHeader: 200 is what we want, and the first write sends it.
@@ -53,7 +81,7 @@ func createEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(event)
+	//fmt.Println(event)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated) // must precede the body, or Encode sends 200
