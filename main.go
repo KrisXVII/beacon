@@ -19,17 +19,17 @@ func (e Event) String() string {
 
 // Function that returns nothing
 func healthCheck(w http.ResponseWriter, r *http.Request) { // w is where the response is written, r the incoming request
-	e := Event{Message: "Hello there", Number: 43}
+	event := Event{Message: "Hello there", Number: 43}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	//w.Write([]byte(`{"status":"ok"}`)) // Write deals in bytes, string is converted to bytes here
-	fmt.Println(e)
-	if e.Message == "" {
+	fmt.Println(event)
+	if event.Message == "" {
 		http.Error(w, "message required", http.StatusBadRequest)
 		return
 	}
-	err := json.NewEncoder(w).Encode(e)
+	err := json.NewEncoder(w).Encode(event)
 	if err != nil {
 		return
 	}
