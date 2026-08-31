@@ -1,0 +1,3 @@
+package alert
+
+// Notifier interface
