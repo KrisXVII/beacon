@@ -1,4 +1,4 @@
-package api
+package httpx
 
 import (
 	"encoding/json"
@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-// decodeJSON reads a single JSON object from the request body into dst,
+// Decode reads a single JSON object from the request body into dst,
 // translating decoder failures into messages safe to return to the client.
-func decodeJSON(r *http.Request, dst any) error {
+func Decode(r *http.Request, dst any) error {
 
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
