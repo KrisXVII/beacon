@@ -1,6 +1,11 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
 	"net/http"
 
 	"github.com/KrisXVII/beacon/internal/alert"
@@ -22,5 +27,19 @@ func (s *Server) createEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err := s.notifier.Notify(event, 3)
+	if err != nil {
+		s.logger.Error("notify failed", "err", err.Error())
+		panic(errors.New(fmt.Sprintf("failed to reach Slack: %s", err.Error())))
+	}
+
 	s.responder.JSON(w, http.StatusOK, event)
+}
+
+func (s *Server) echoEvent(w http.ResponseWriter, r *http.Request) {
+	body, _ := io.ReadAll(r.Body)
+	var pretty bytes.Buffer
+	json.Indent(&pretty, body, "", "  ")
+	fmt.Println(pretty.String())
+	w.WriteHeader(http.StatusOK)
 }

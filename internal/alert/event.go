@@ -6,17 +6,29 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
 
+type Frame struct {
+	File string `json:"file"`
+	Line int    `json:"line"`
+	Func string `json:"func"`
+}
+
 // Define the struct which encodes the shape of the object this API works with and requires from Flask
 
 type Event struct {
-	ID      string `json:"id" validate:"required"`
-	Message string `json:"message" validate:"required"`
-	Number  int    `json:"number"  validate:"gte=0"`
-	//Level   string `json:"level"   validate:"required,oneof=info warn error"`
+	PosthogEventID string    `json:"posthog_event_id" validate:"required"`
+	Service        string    `json:"service"`
+	ErrorType      string    `json:"error_type" validate:"required"`
+	Method         string    `json:"method"`
+	Route          string    `json:"route" validate:"required"`
+	Environment    string    `json:"environment" validate:"required"`
+	Message        string    `json:"message" validate:"required"`
+	Frames         []Frame   `json:"frames"`
+	OccurredAt     time.Time `json:"occurred_at"`
 }
 
 var validate = newValidator()
